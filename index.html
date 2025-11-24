@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Viaggi.App • Il tuo assistente di viaggi</title>
+  <meta name="description" content="Il tuo agente di viaggio virtuale. Cerca, pianifica e parti.">
+
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    /* --- RESET & VARIABLES --- */
+    *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+     
+    :root {
+      --primary: #0f172a;
+      --secondary: #334155;
+      --accent: #0ea5e9;
+      --accent-dark: #0284c7;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #334155;
+      --text-light: #64748b;
+      --border: #e2e8f0;
+      --radius: 16px;
+      --header-h: 64px;
+      
+      --trekk: #4285f4;
+      --viaggi: #ea4335;
+      --crociere: #fbbc05;
+      --ai-color: #8b5cf6;
+      --ai-bg: #f5f3ff;
+      --sponsor-color: #059669;
+      
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px -2px rgba(0,0,0,0.08);
+      --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.1);
+    }
+
+    /* ANIMAZIONI */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+     
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+    }
+
+    .animate-fade-in { animation: fadeInUp 0.5s ease-out forwards; opacity: 0; }
+    .delay-100 { animation-delay: 0.1s; }
+    .delay-200 { animation-delay: 0.2s; }
+    .delay-300 { animation-delay: 0.3s; }
+
+    body {
+      margin: 0; font-family: "Open Sans", sans-serif; background-color: var(--bg); color: var(--text);
+      line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; padding-top: var(--header-h);
+    }
+
+    a { text-decoration: none; color: inherit; transition: all 0.2s; }
+    h1, h2, h3, h4 { font-family: "Montserrat", sans-serif; margin: 0; color: var(--primary); line-height: 1.3; }
+    button { cursor: pointer; font-family: inherit; border: none; }
+
+    /* --- HEADER --- */
+    header {
+      background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      height: var(--header-h); position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      border-bottom: 1px solid rgba(255,255,255,0.1); padding-top: env(safe-area-inset-top);
+    }
+    .nav-wrapper {
+      width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 20px;
+      display: flex; align-items: center; justify-content: space-between; height: 100%;
+    }
+    .brand-logo { display: flex; align-items: center; gap: 10px; transition: transform 0.2s; }
+    .brand-logo:hover { transform: scale(1.02); }
+    .brand-icon { width: 28px; height: 28px; color: var(--accent); }
+    .logo-text { font-family: "Montserrat", sans-serif; font-size: 20px; font-weight: 800; color: white; letter-spacing: -0.5px; }
+
+    /* Desktop Nav */
+    .desktop-nav { display: none; gap: 24px; align-items: center; }
+    .nav-link { 
+        color: #cbd5e1; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 6px;
+        position: relative; padding-bottom: 2px;
+    }
+    .nav-link::after {
+        content: ''; position: absolute; width: 0; height: 2px; bottom: 0; left: 0;
+        background-color: var(--accent); transition: width 0.3s;
+    }
+    .nav-link:hover { color: white; }
+    .nav-link:hover::after { width: 100%; }
+    .nav-link span { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+     
+    .btn-header-sponsor {
+        background: var(--sponsor-color); color: white; padding: 8px 16px; border-radius: 8px;
+        font-size: 13px; font-weight: 700; transition: all 0.2s;
+    }
+    .btn-header-sponsor:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(5,150,105,0.4); }
+
+    .menu-trigger { background: rgba(255,255,255,0.1); color: white; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+    @media (min-width: 768px) { .menu-trigger { display: none; } .desktop-nav { display: flex; } }
+
+    /* --- MOBILE MENU --- */
+    .mobile-menu-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1001; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(4px); }
+    .mobile-menu-overlay.open { opacity: 1; pointer-events: auto; }
+    .mobile-menu-panel { position: fixed; top: 0; right: -300px; bottom: 0; width: 85%; max-width: 320px; background: var(--surface); z-index: 1002; transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1); padding: 24px 20px; display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.2); padding-top: calc(20px + env(safe-area-inset-top)); }
+    .mobile-menu-panel.open { right: 0; }
+    .menu-links { display: flex; flex-direction: column; gap: 12px; margin-top: 30px; }
+    .menu-link { font-size: 16px; font-weight: 600; padding: 16px; border-radius: 12px; background: #f8fafc; color: var(--primary); display: flex; align-items: center; gap: 12px; }
+    .menu-link span { width: 10px; height: 10px; border-radius: 50%; }
+
+    /* --- HERO --- */
+    .hero {
+      background: linear-gradient(to bottom, rgba(15,23,42,0.3) 0%, rgba(15,23,42,0.85) 100%), url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80');
+      background-size: cover; background-position: center; padding: 40px 20px 80px; color: white; text-align: center;
+      position: relative; min-height: 45vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .hero::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 30px; background: var(--bg); border-radius: 24px 24px 0 0; z-index: 5; }
+    .hero-title { font-size: clamp(26px, 6vw, 42px); font-weight: 800; margin-bottom: 12px; text-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+    .hero-subtitle { color: #e2e8f0; font-size: 15px; margin-bottom: 30px; max-width: 500px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+
+    /* --- ENGINE --- */
+    .engine-container {
+      background: var(--surface); border-radius: 24px; padding: 24px;
+      width: 100%; max-width: 900px; margin: -60px auto 0;
+      box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15);
+      position: relative; z-index: 10; border: 1px solid rgba(255,255,255,0.8);
+    }
+    @media(max-width:640px) { .engine-container { padding: 16px; margin-top: -40px; } }
+
+    .engine-tabs { display: flex; gap: 10px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9; margin-bottom: 20px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .engine-tabs::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      padding: 10px 20px; background: #f1f5f9; font-weight: 600; color: #64748b; border-radius: 99px; white-space: nowrap; font-size: 14px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .tab-btn.active { background: var(--primary); color: white; box-shadow: var(--shadow-md); transform: scale(1.05); }
+    .tab-btn.active[data-target="ai"] { background: var(--ai-color); color: white; }
+    .tab-btn.active[data-target="offers"] { background: var(--sponsor-color); color: white; }
+
+    /* --- FORMS --- */
+    .form-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+    .col-span-12 { grid-column: span 12; }
+    .col-span-6 { grid-column: span 6; }
+    @media (max-width: 640px) { .col-span-6 { grid-column: span 12; } .form-grid { gap: 12px; } }
+
+    .input-wrapper { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+    .input-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin-left: 4px; letter-spacing: 0.5px; }
+    .input-field {
+      width: 100%; padding: 14px 16px; border: 2px solid #f1f5f9; border-radius: 14px; font-size: 16px; background: #fff; color: var(--primary); font-weight: 500; font-family: inherit; appearance: none; transition: all 0.2s;
+    }
+    .input-field:focus { outline: none; border-color: var(--ai-color); background: #fff; box-shadow: 0 0 0 4px rgba(139,92,246,0.1); }
+    select.input-field { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 14px center; background-size: 16px; padding-right: 40px; }
+
+    .btn-search {
+      width: 100%; padding: 16px; border-radius: 14px; background: var(--primary); color: white; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s, box-shadow 0.2s; box-shadow: var(--shadow-md);
+    }
+    .btn-search:active { transform: scale(0.97); }
+    .btn-search.ai-btn { background: var(--ai-color); box-shadow: 0 8px 20px -4px rgba(139,92,246,0.4); }
+    .btn-search.offer-btn { background: var(--sponsor-color); }
+
+    /* --- RESULTS --- */
+    .results-area { padding: 40px 20px 80px; max-width: 1200px; margin: 0 auto; }
+    .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+    @media (max-width: 640px) { .grid-cards { grid-template-columns: 1fr; gap: 20px; } }
+
+    .card {
+      background: var(--surface); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid #f1f5f9; display: flex; flex-direction: column; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+    }
+    .card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+    .card-body { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
+    .card-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--primary); }
+    .card-desc { font-size: 14px; color: #64748b; margin-bottom: 20px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+     
+    .btn-group { display: flex; gap: 10px; margin-top: auto; }
+    .btn-card {
+        flex: 1; text-align: center; padding: 12px; background: #f0f9ff; color: var(--accent-dark); border-radius: 10px; font-weight: 700; font-size: 13px; border: 1px solid transparent; transition: all 0.2s;
+    }
+    .btn-card:hover { background: #e0f2fe; }
+    .btn-summary { background: #f5f3ff; color: var(--ai-color); }
+    .btn-summary:hover { background: #ede9fe; }
+
+    /* SPONSOR & BANNER */
+    .card.sponsor { border: 2px solid var(--sponsor-color); background: #ecfdf5; }
+    .sponsor-badge { background: var(--sponsor-color); color: white; font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 12px; }
+    .btn-sponsor { background: var(--sponsor-color); color: white; width: 100%; padding: 12px; border-radius: 10px; font-weight: 700; margin-top: auto; }
+    .banner-container { width: 100%; display: flex; justify-content: center; overflow: hidden; border-radius: 16px; margin-bottom: 10px; }
+    .banner-container img { max-width: 100%; height: auto; display: block; }
+
+    /* SOURCE BADGE */
+    .source-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+    }
+
+    /* --- AI PLANNER PRO --- */
+    .ai-result-box {
+        grid-column: 1 / -1; background: white; border: 2px solid var(--ai-color); border-radius: 24px; padding: 30px; position: relative; box-shadow: var(--shadow-lg);
+    }
+    @media (max-width: 640px) { .ai-result-box { padding: 20px; border-width: 2px; } }
+
+    .ai-content h1 { font-size: 24px; color: var(--ai-color); margin-top: 0; letter-spacing: -0.5px; }
+    .ai-content h2 { font-size: 18px; margin-top: 24px; color: var(--primary); border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 12px; }
+    .ai-content p { color: #475569; margin-bottom: 12px; font-size: 15px; line-height: 1.7; }
+    .ai-content ul { padding-left: 20px; margin-bottom: 16px; }
+    .ai-content li { margin-bottom: 8px; color: var(--secondary); font-size: 15px; }
+    .ai-content strong { color: var(--primary); font-weight: 700; }
+
+    /* AI Action Grid */
+    .ai-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #f1f5f9; }
+    @media (min-width: 640px) { .ai-actions { grid-template-columns: repeat(4, 1fr); } }
+
+    .btn-action-ai {
+        background: #ffffff; color: var(--ai-color); border: 1px solid #ddd6fe; padding: 14px 10px; border-radius: 14px; font-weight: 600; font-size: 13px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: all 0.2s; text-align: center;
+    }
+    .btn-action-ai:hover { border-color: var(--ai-color); background: #f5f3ff; transform: translateY(-3px); box-shadow: 0 4px 12px rgba(139,92,246,0.15); }
+    .btn-action-ai span { font-size: 20px; display: block; margin-bottom: 2px; }
+
+    /* --- MODAL --- */
+    .ai-modal { position: fixed; top:0;left:0;right:0;bottom:0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 16px; opacity: 0; transition: opacity 0.3s; }
+    .ai-modal.open { display: flex; opacity: 1; }
+    .ai-modal-content { background: white; width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto; border-radius: 24px; padding: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .ai-modal.open .ai-modal-content { transform: scale(1); }
+
+    /* FOOTER */
+    footer { background: var(--primary); color: #94a3b8; padding: 40px 20px; text-align: center; margin-top: auto; padding-bottom: calc(40px + env(safe-area-inset-bottom)); }
+
+    /* UTILS */
+    .hidden { display: none !important; }
+    .loader { text-align: center; padding: 40px; color: #64748b; }
+    .loader-spinner {
+        display: inline-block; width: 36px; height: 36px; border: 3px solid rgba(0,0,0,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+  
+  <script>
+    function openWin() { 
+        const myWindow = window.open('https://img.affiliate.logitravel.com/uploaded/docs/52d6a5f402b18-LinkBuilderIT.html','_blank','width=700,height=1000,scrollbars=yes'); 
+        if(myWindow) myWindow.focus(); 
+    }
+  </script>
+</head>
+<body>
+
+  <header>
+    <div class="nav-wrapper">
+      <div class="brand-logo">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13" /><path d="M22 2L15 22L11 13L2 9L22 2Z" /></svg>
+        <span class="logo-text">Viaggi.App</span>
+      </div>
+      
+      <nav class="desktop-nav">
+          <a href="https://trekk.club" target="_blank" class="nav-link"><span style="background:var(--trekk)"></span> Trekk</a>
+          <a href="https://viaggi.club" target="_blank" class="nav-link"><span style="background:var(--viaggi)"></span> Viaggi</a>
+          <a href="https://crociere.club" target="_blank" class="nav-link"><span style="background:var(--crociere)"></span> Crociere</a>
+          <button onclick="openWin()" class="btn-header-sponsor">Offerte</button>
+      </nav>
+
+      <button class="menu-trigger" onclick="toggleMenu()" aria-label="Menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
+    </div>
+  </header>
+
+  <div id="menu-overlay" class="mobile-menu-overlay" onclick="toggleMenu()"></div>
+  <div id="menu-panel" class="mobile-menu-panel">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-weight:800; font-size:18px; color:var(--primary)">Network</span>
+        <button onclick="toggleMenu()" style="font-size:28px; background:none; border:none; color:var(--text)">&times;</button>
+    </div>
+    <div class="menu-links">
+        <a href="https://trekk.club" class="menu-link"><span style="background:var(--trekk)"></span> Trekk.Club</a>
+        <a href="https://viaggi.club" class="menu-link"><span style="background:var(--viaggi)"></span> Viaggi.Club</a>
+        <a href="https://crociere.club" class="menu-link"><span style="background:var(--crociere)"></span> Crociere.Club</a>
+        <div style="border-top:1px solid #e2e8f0; margin-top:15px; padding-top:15px;">
+            <p style="font-size:11px; color:#94a3b8; margin-bottom:8px; font-weight:700; text-transform:uppercase;">Partner</p>
+            <button onclick="openWin()" style="width:100%; padding:14px; background:var(--sponsor-color); color:white; border-radius:12px; font-weight:700; border:none;">Vedi Offerte Logitravel</button>
+        </div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <h1 id="heroTitle" class="hero-title">Il mondo ti aspetta.</h1>
+    <p class="hero-subtitle">Esplora guide autentiche, offerte esclusive e pianifica con l'assistente AI.</p>
+
+    <div class="engine-container">
+      <div class="engine-tabs">
+        <button class="tab-btn active" data-target="content" onclick="setMode('content')"> Guide</button>
+        <button class="tab-btn" data-target="ai" onclick="setMode('ai')"> Assistente</button>
+        <button class="tab-btn" data-target="offers" onclick="setMode('offers')"> Offerte</button>
+      </div>
+
+      <div id="inputs-content" class="form-grid">
+         <div class="input-wrapper col-span-12">
+           <label class="input-label">Cerca Articoli e Guide</label>
+           <input type="text" id="contentDestInput" class="input-field" placeholder="Es. Trekking Dolomiti, Maldive...">
+         </div>
+         <div class="col-span-12">
+           <button onclick="doSearch()" class="btn-search">Trova Ispirazione</button>
+         </div>
+      </div>
+
+      <form id="searchForm" onsubmit="handleSearch(event)" class="hidden form-grid">
+        <div id="inputs-ai-content" class="form-grid" style="grid-column:1/-1;">
+            <div class="input-wrapper col-span-12">
+                <label class="input-label">Dove vorresti andare?</label>
+                <input list="destinations" id="aiDestInput" class="input-field" placeholder="Scegli o scrivi una meta..." required>
+                <datalist id="destinations">
+                    <option value="Maldive"><option value="Dolomiti"><option value="Giappone"><option value="New York">
+                    <option value="Islanda"><option value="Costiera Amalfitana"><option value="Parigi"><option value="Egitto">
+                </datalist>
+            </div>
+            <div class="input-wrapper col-span-6">
+                <label class="input-label">Durata</label>
+                <select id="aiDays" class="input-field">
+                    <option value="Weekend">Weekend</option>
+                    <option value="Settimana">1 Settimana</option>
+                    <option value="10 Giorni">10 Giorni</option>
+                    <option value="2 Settimane">2 Settimane</option>
+                </select>
+            </div>
+            <div class="input-wrapper col-span-6">
+                <label class="input-label">Stile</label>
+                <select id="aiType" class="input-field">
+                    <option value="Relax"> Relax</option>
+                    <option value="Avventura"> Avventura</option>
+                    <option value="Cultura"> Cultura</option>
+                    <option value="Cibo"> Enogastronomico</option>
+                    <option value="Romantico"> Romantico</option>
+                    <option value="Famiglia"> Famiglia</option>
+                </select>
+            </div>
+            <div class="col-span-12">
+                <button type="submit" class="btn-search ai-btn"> Genera Itinerario</button>
+            </div>
+        </div>
+      </form>
+
+      <div id="inputs-offers" class="form-grid hidden">
+            <div class="input-wrapper col-span-12">
+              <label class="input-label">Destinazione Offerta</label>
+              <input type="text" id="offerDestInput" class="input-field" placeholder="Es. Sharm, Londra...">
+            </div>
+            <div class="col-span-12">
+              <button onclick="doSearch()" class="btn-search offer-btn">Trova Prezzi</button>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <main class="container results-area">
+    <div style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+        <h3 id="resultsTitle">Ultime Guide dal Network</h3>
+    </div>
+    <div id="gridContainer" class="grid-cards"></div>
+  </main>
+
+  <footer>
+    <p><strong>Viaggi.App</strong></p>
+    <p style="font-size:12px;">Network Trekk.Club • Viaggi.Club • Crociere.Club</p>
+  </footer>
+
+  <div id="aiModal" class="ai-modal">
+    <div class="ai-modal-content">
+        <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+            <h3 style="color:var(--ai-color); margin:0; font-size:18px;">AI Agent</h3>
+            <button onclick="closeAiModal()" style="background:none; font-size:28px; color:var(--text); border:none; line-height:1;">&times;</button>
+        </div>
+        <div id="aiModalBody" style="font-size:15px; line-height:1.6;"></div>
+    </div>
+  </div>
+
+  <script>
+    function toggleMenu() {
+        document.getElementById('menu-panel').classList.toggle('open');
+        document.getElementById('menu-overlay').classList.toggle('open');
+    }
+
+    let currentMode = 'content';
+    let DB = { content: [], offers: [] };
+    let lastAiParams = {};
+    let currentItems = [];
+
+    // REAL OFFERS
+    DB.offers = [
+        { title: "Marsa Alam Life Resort", provider: "Logitravel", price: 234, desc: "Volo + 7 notti, All Inclusive. Partenza Gennaio.", link: "https://www.logitravel.it/viaggi/marsa-alam/" },
+        { title: "Londra & Harry Potter", provider: "Logitravel", price: 363, desc: "3 giorni / 2 notti con ingresso Studios incluso.", link: "https://www.logitravel.it/viaggi/londra/" },
+        { title: "Budapest City Break", provider: "Logitravel", price: 117, desc: "Volo + Hotel centrale, 3 giorni.", link: "https://www.logitravel.it/viaggi/budapest/" },
+        { title: "Crociera MSC Mediterraneo", provider: "MSC", price: 499, desc: "7 notti: Italia, Francia, Spagna. Pensione completa.", link: "https://www.msccrociere.it" },
+        { title: "Sharm El Sheikh 5*", provider: "Logitravel", price: 352, desc: "Coral Hills Resort, All Inclusive, Sconti Black Week.", link: "https://www.logitravel.it/viaggi/sharm-el-sheikh/" },
+        { title: "New York Times Square", provider: "Logitravel", price: 892, desc: "Volo + 5 notti in hotel centrale.", link: "https://www.logitravel.it/viaggi/new-york/" }
+    ];
+
+    const RSS_FEEDS = [
+        { url: "https://trekk.club/feed/", color: "#4285f4", name: "Trekk" },
+        { url: "https://viaggi.club/feed/", color: "#ea4335", name: "Viaggi" },
+        { url: "https://crociere.club/feed/", color: "#fbbc05", name: "Crociere" }
+    ];
+    const API_PROXY = "https://api.rss2json.com/v1/api.json?rss_url=";
+
+    async function loadFeeds() {
+        const grid = document.getElementById('gridContainer');
+        grid.innerHTML = `<div class="loader"><div class="loader-spinner"></div>Caricamento guide...</div>`;
+        
+        let allNews = [];
+        const promises = RSS_FEEDS.map(f => fetch(API_PROXY + encodeURIComponent(f.url))
+            .then(r=>r.json())
+            .then(d=>d.items ? d.items.map(i=>({...i, source:f.name, color:f.color})) : [])
+            .catch(()=>[])
+        );
+        const res = await Promise.all(promises);
+        res.forEach(r => allNews = allNews.concat(r));
+        DB.content = allNews.sort((a,b) => new Date(b.pubDate) - new Date(a.pubDate));
+        
+        if(currentMode === 'content') renderGrid(DB.content, "");
+    }
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector(`.tab-btn[data-target="${mode}"]`).classList.add('active');
+        
+        document.getElementById('inputs-content').classList.add('hidden');
+        document.getElementById('searchForm').classList.add('hidden'); 
+        document.getElementById('inputs-offers').classList.add('hidden');
+
+        const title = document.getElementById('resultsTitle');
+        const grid = document.getElementById('gridContainer');
+        const heroTitle = document.getElementById('heroTitle');
+        
+        if(mode === 'ai') {
+            document.getElementById('searchForm').classList.remove('hidden');
+            heroTitle.innerText = "Il tuo assistente di viaggi";
+            title.innerText = "Il tuo piano di viaggio";
+            grid.innerHTML = `<div class="animate-fade-in" style="grid-column:1/-1; text-align:center; color:#64748b; padding:20px;">Compila il form sopra per iniziare.</div>`;
+        } else if(mode === 'content') {
+            document.getElementById('inputs-content').classList.remove('hidden');
+            heroTitle.innerText = "Il mondo ti aspetta.";
+            title.innerText = "Guide dal Network";
+            renderGrid(DB.content, "");
+        } else {
+            document.getElementById('inputs-offers').classList.remove('hidden');
+            heroTitle.innerText = "Offerte Esclusive";
+            title.innerText = "Migliori Prezzi";
+            renderGrid(DB.offers, "");
+        }
+    }
+
+    function handleSearch(e) {
+        e.preventDefault();
+        if(currentMode === 'ai') generateItinerary();
+    }
+
+    function doSearch() {
+        const grid = document.getElementById('gridContainer');
+        grid.innerHTML = `<div class="loader"><div class="loader-spinner"></div>Ricerca...</div>`;
+        
+        setTimeout(() => {
+            let results = [];
+            let query = "";
+            
+            if(currentMode === 'content') {
+                query = document.getElementById('contentDestInput').value.toLowerCase();
+                results = DB.content.filter(i => i.title.toLowerCase().includes(query));
+            } else {
+                query = document.getElementById('offerDestInput').value.toLowerCase();
+                results = DB.offers.filter(i => i.title.toLowerCase().includes(query));
+            }
+            renderGrid(results, query);
+        }, 400);
+    }
+
+    function renderGrid(items, query) {
+        const grid = document.getElementById('gridContainer');
+        grid.innerHTML = "";
+
+        let workingItems = items;
+
+        if (workingItems.length === 0) {
+            grid.innerHTML = `
+                <div class="animate-fade-in" style="grid-column:1/-1; padding:20px; text-align:center; background:#fff; border-radius:16px; border:1px dashed #cbd5e1; margin-bottom:20px;">
+                    <div style="font-size:32px; margin-bottom:10px;"></div>
+                    <h3 style="font-size:18px; margin-bottom:8px;">Nessun risultato esatto per "${query}"</h3>
+                    <p style="color:#64748b; font-size:14px;">Ecco alcune alternative popolari che potrebbero interessarti!</p>
+                </div>
+            `;
+            workingItems = currentMode === 'content' ? DB.content.slice(0, 6) : DB.offers;
+        }
+
+        // aggiorno la sorgente per askAISummary
+        currentItems = workingItems;
+
+        workingItems.forEach((item, idx) => {
+            // SPONSOR CARD INJECTION
+            if (idx === 2) {
+                grid.innerHTML += `
+                <div class="card sponsor animate-fade-in delay-100">
+                    <div class="card-body">
+                        <span class="sponsor-badge">Consigliato</span>
+                        <h4 class="card-title">Offerte Logitravel</h4>
+                        <p class="card-desc">Pacchetti vacanze e crociere ai migliori prezzi del mercato.</p>
+                        <button onclick="openWin()" class="btn-sponsor">Vedi Promozioni</button>
+                    </div>
+                </div>`;
+            }
+            // BANNER (Every 5 items)
+            if (idx === 5) {
+                grid.innerHTML += `
+                <div class="card banner-card animate-fade-in delay-200" style="background:transparent; border:none; box-shadow:none; padding:0;">
+                    <div class="banner-container" style="width:100%; display:flex; justify-content:center; overflow:hidden; border-radius:16px;">
+                        <a href="https://ssl.affiliate.logitravel.com/ts/i2160179/tsc?typ=r&amc=performance.logitravel.540017.560386.CRTbxyjKgqv" target="_blank" rel="sponsored">
+                            <img src="https://ssl.affiliate.logitravel.com/ts/i2160179/tsv?amc=performance.logitravel.540017.560386.CRTbxyjKgqv" border="0" width="300" height="250" alt="300x250_Viaggi_Always On" style="max-width:100%; height:auto;" />
+                        </a>
+                    </div>
+                </div>`;
+            }
+
+            let html = "";
+            const delayClass = idx < 3 ? `delay-${(idx+1)*100}` : '';
+            
+            if(currentMode === 'content') {
+                const tempDiv = document.createElement('div'); 
+                tempDiv.innerHTML = item.description || "";
+                const text = tempDiv.textContent || tempDiv.innerText || "";
+
+                // salvo il testo pulito sull'oggetto per l'AI
+                item._plainText = text;
+
+                html = `
+                <div class="card animate-fade-in ${delayClass}">
+                    <div style="height:4px; background:${item.color}"></div>
+                    <div class="card-body">
+                        <span class="source-badge" style="color:${item.color}; background:#f1f5f9;">${item.source}</span>
+                        <h4 class="card-title">${item.title}</h4>
+                        <p class="card-desc">${text}</p>
+                        <div class="btn-group">
+                            <button onclick="askAISummary(${idx})" class="btn-card btn-summary"> Riassunto AI</button>
+                            <a href="${item.link}" target="_blank" class="btn-card">Leggi Articolo</a>
+                        </div>
+                    </div>
+                </div>`;
+            } else {
+                html = `
+                <div class="card animate-fade-in ${delayClass}">
+                    <div style="height:4px; background:var(--sponsor-color)"></div>
+                    <div class="card-body">
+                        <span style="font-size:11px; font-weight:bold; color:#94a3b8;">${item.provider}</span>
+                        <h4 class="card-title">${item.title}</h4>
+                        <p class="card-desc">${item.desc}</p>
+                        <div style="margin-top:auto; font-size:20px; font-weight:800; color:var(--sponsor-color); margin-bottom:10px;">€ ${item.price}</div>
+                        <a href="${item.link}" target="_blank" class="btn-card">Vedi Offerta</a>
+                    </div>
+                </div>`;
+            }
+            grid.innerHTML += html;
+        });
+    }
+
+    // --- AI LOGIC (BACKEND CALL) ---
+    async function callGemini(prompt) {
+        // Chiama il file che abbiamo creato nella cartella /api
+        const url = '/api/ask-ai'; 
+
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: prompt }) // Inviamo solo il prompt
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                console.error("Errore Backend:", data);
+                return "C'è stato un problema tecnico. Riprova più tardi.";
+            }
+
+            return data.result; 
+
+        } catch (e) {
+            console.error("Errore di rete:", e);
+            return "Errore di connessione. Verifica la tua rete.";
+        }
+    }
+
+    async function generateItinerary() {
+        const dest = document.getElementById('aiDestInput').value;
+        const days = document.getElementById('aiDays').value;
+        const type = document.getElementById('aiType').value;
+        
+        if(!dest) return alert("Inserisci una destinazione!");
+        
+        lastAiParams = { dest, days, type };
+        const grid = document.getElementById('gridContainer');
+        grid.innerHTML = `<div class="loader"><div class="loader-spinner" style="border-top-color:var(--ai-color)"></div><br><strong style="color:var(--ai-color)">L'assistente sta pianificando...</strong></div>`;
+
+        const prompt = `Agisci come travel planner esperto. Crea itinerario per ${dest}, ${days}, stile ${type}.
+        Formatta in Markdown. Includi Titolo, Intro, Itinerario sintetico e 1 Consiglio Segreto. Usa emoji.`;
+
+        const text = await callGemini(prompt);
+        const html = typeof marked !== 'undefined' ? marked.parse(text) : text;
+
+        grid.innerHTML = `
+        <div class="ai-result-box animate-fade-in">
+            <div class="ai-content">${html}</div>
+            <div class="ai-actions">
+                <button onclick="aiTask('bag')" class="btn-action-ai"><span></span>Valigia</button>
+                <button onclick="aiTask('food')" class="btn-action-ai"><span></span>Cibo</button>
+                <button onclick="aiTask('lang')" class="btn-action-ai"><span></span>Lingua</button>
+                <button onclick="aiTask('budget')" class="btn-action-ai"><span></span>Budget</button>
+                <button onclick="aiTask('gems')" class="btn-action-ai"><span></span>Gemme</button>
+                <button onclick="aiTask('safety')" class="btn-action-ai"><span></span>Sicurezza</button>
+                <button onclick="aiTask('photo')" class="btn-action-ai"><span></span>Foto</button>
+                <button onclick="aiTask('souvenir')" class="btn-action-ai"><span></span>Souvenir</button>
+            </div>
+            
+            <div style="margin-top:20px; padding-top:15px; border-top:1px dashed #e2e8f0; text-align:center;">
+                <div class="banner-container">
+                    <a href="https://ssl.affiliate.logitravel.com/ts/i2160179/tsc?typ=r&amc=performance.logitravel.540017.560386.CRTbxyjKgqv" target="_blank" rel="sponsored">
+                        <img src="https://ssl.affiliate.logitravel.com/ts/i2160179/tsv?amc=performance.logitravel.540017.560386.CRTbxyjKgqv" border="0" width="300" height="250" alt="300x250_Viaggi_Always On" style="max-width:100%; height:auto;" />
+                    </a>
+                </div>
+                <button onclick="openWin()" style="background:var(--sponsor-color); color:white; border:none; padding:12px 24px; border-radius:12px; font-weight:700; cursor:pointer; width:100%; box-shadow:0 4px 12px rgba(16,185,129,0.3);">Vedi Offerte Logitravel per ${dest}</button>
+            </div>
+        </div>`;
+    }
+
+    async function aiTask(task) {
+        const { dest, type } = lastAiParams;
+        if(!dest) return;
+        
+        const modal = document.getElementById('aiModal');
+        const body = document.getElementById('aiModalBody');
+        body.innerHTML = `<div class="loader"><div class="loader-spinner"></div>Elaborazione...</div>`;
+        modal.classList.add('open');
+
+        let prompt = "";
+        if(task==='bag') prompt = `Lista valigia per ${dest}, stile ${type}. Bullet points.`;
+        if(task==='food') prompt = `3 Piatti tipici di ${dest}. Breve descrizione.`;
+        if(task==='lang') prompt = `5 Frasi utili in lingua locale per ${dest}.`;
+        if(task==='budget') prompt = `Stima budget giornaliero medio per ${dest} stile ${type} (Cibo, Trasporti).`;
+        if(task==='gems') prompt = `2 Luoghi poco turistici a ${dest}.`;
+        if(task==='safety') prompt = `Consigli sicurezza e truffe da evitare a ${dest}.`;
+        if(task==='photo') prompt = `Migliori spot fotografici a ${dest}.`;
+        if(task==='souvenir') prompt = `Cosa comprare di autentico a ${dest}.`;
+
+        const text = await callGemini(prompt);
+        body.innerHTML = typeof marked !== 'undefined' ? marked.parse(text) : text;
+    }
+
+    async function askAISummary(idx) {
+        const item = currentItems[idx];
+        const modal = document.getElementById('aiModal');
+        const body = document.getElementById('aiModalBody');
+        
+        body.innerHTML = `<div class="loader"><div class="loader-spinner"></div>Analisi in corso...</div>`;
+        modal.classList.add('open');
+        
+        const ctx = (item._plainText || item.description || "").toString();
+        
+        const prompt = `Analizza questo articolo: "${item.title}". Contesto: "${ctx.substring(0,300)}".
+Dammi 3 motivi bullet point (con emoji) per visitare questo luogo o leggere l'articolo. Sii breve.`;
+        
+        const text = await callGemini(prompt);
+        let html = typeof marked !== 'undefined' ? marked.parse(text) : text;
+        
+        html += `
+        <div style="margin-top:20px; border-top:1px solid #e2e8f0; padding-top:15px; text-align:center;">
+            <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Ti ha ispirato? Cerca offerte.</p>
+            <button onclick="openWin()" style="background:var(--sponsor-color); color:white; width:100%; padding:12px; border-radius:10px; font-weight:700; border:none; cursor:pointer;">Vedi Prezzi su Logitravel</button>
+        </div>
+        `;
+        
+        body.innerHTML = html;
+    }
+
+    function closeAiModal() { document.getElementById('aiModal').classList.remove('open'); }
+
+    loadFeeds();
+  </script>
+</body>
+</html>
