@@ -1,4 +1,4 @@
-// api/ask-ai.js
+/api/ask-ai.js
 export default async function handler(req, res) {
   // 1. Abilita CORS (per permettere al frontend di chiamare questo script)
   res.setHeader('Access-Control-Allow-Credentials', true);
