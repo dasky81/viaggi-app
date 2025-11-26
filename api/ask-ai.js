@@ -28,10 +28,13 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Nessun prompt.' });
     }
 
-    // --- MODIFICA IMPORTANTE QUI SOTTO ---
-    // Abbiamo cambiato il modello in 'gemini-1.5-flash-latest' che è più stabile
+    // --- CORREZIONE MODELLO ---
+    // Usiamo il nome standard "gemini-1.5-flash" (senza -latest)
+    // Se questo non va, puoi provare a scrivere "gemini-pro" al suo posto.
+    const model = 'gemini-1.5-flash';
+    
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -45,7 +48,6 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       console.error("Errore Google:", data);
-      // Se anche questo fallisce, l'errore ci dirà quali modelli sono disponibili
       return res.status(response.status).json({ error: data.error?.message || 'Errore AI' });
     }
 
