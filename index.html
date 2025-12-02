@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Viaggi.App • Il tuo Assistente di Viaggio</title>
-  <meta name="description" content="Trova le migliori offerte di viaggio Logitravel e pianifica il tuo prossimo viaggio.">
+  <meta name="description" content="Trova le migliori offerte di viaggio Logitravel e pianifica il tuo prossimo viaggio con il nostro assistente.">
 
   <!-- FONTS & ICONS -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,8 +40,8 @@
   </script>
 
   <style>
-    /* Glassmorphism & Utilities */
-    .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.6); }
+    /* Custom Glassmorphism & Utilities */
+    .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.6); }
     .glass-dark { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -70,6 +70,7 @@
     function generateAffiliateLink(path) {
       if (!path) return `${LOGITRAVEL_BASE}/?${AFFILIATE_PARAM}`;
       
+      // Se è un URL completo
       if (path.startsWith('http')) {
         if (path.includes('logitravel.it') && !path.includes(AFFILIATE_PARAM)) {
           const separator = path.includes('?') ? '&' : '?';
@@ -78,6 +79,7 @@
         return path;
       }
       
+      // Se è un percorso relativo
       const separator = path.includes('?') ? '&' : '?';
       return `${LOGITRAVEL_BASE}${path}${separator}${AFFILIATE_PARAM}`;
     }
@@ -94,8 +96,6 @@
   <!-- HEADER -->  
   <header class="fixed top-0 left-0 right-0 z-50 glass-dark h-16 transition-all duration-300">
     <div class="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
-      
-      <!-- Logo -->
       <div class="flex items-center gap-2 group cursor-pointer" onclick="location.reload()">
         <div class="bg-gradient-to-br from-blue-500 to-indigo-600 p-1.5 rounded-lg group-hover:rotate-12 transition-transform duration-300">
           <i data-lucide="plane" class="text-white w-5 h-5"></i>
@@ -171,7 +171,7 @@
       <div class="glass rounded-3xl p-2 md:p-6 shadow-2xl animate-fade-up [animation-delay:300ms]">
         
         <!-- Tabs -->
-        <div class="flex gap-2 mb-6 overflow-x-auto no-scrollbar p-1 justify-center md:justify-start">
+        <div class="flex gap-2 mb-6 overflow-x-auto no-scrollbar p-1 md:justify-center justify-start w-full">
           <button onclick="setMode('content')" class="tab-btn active flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap bg-white shadow-md text-slate-900" data-target="content">
             <i data-lucide="book-open" class="w-4 h-4"></i> Guide
           </button>
@@ -235,7 +235,7 @@
             </div>
           </form>
 
-          <!-- Offers CTA -->
+          <!-- Offers CTA (SIMPLE BUTTON) -->
           <div id="inputs-offers" class="hidden flex flex-col items-center justify-center py-6 text-center animate-fade-up">
              <h3 class="text-lg font-bold text-slate-800 mb-2">Non sai dove andare?</h3>
              <p class="text-sm text-slate-500 mb-6 max-w-md mx-auto">Lasciati ispirare dalle promozioni esclusive del momento selezionate dai nostri partner.</p>
@@ -249,9 +249,6 @@
             <h3 class="text-lg font-bold text-slate-800 mb-2">Quanto conosci il mondo? 🌍</h3>
             <p class="text-sm text-slate-500 mb-6">Mettiti alla prova con il nostro quiz interattivo.</p>
             <button onclick="startQuiz()" class="mx-auto px-8 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold rounded-full shadow-lg shadow-rose-500/30 hover:scale-105 transition-transform flex items-center gap-2"><i data-lucide="play-circle" class="w-5 h-5"></i> Inizia Quiz</button>
-            <div class="mt-4">
-                <button onclick="generateAIQuiz()" class="text-xs font-bold text-slate-400 hover:text-rose-500 flex items-center justify-center gap-1 mx-auto transition-colors"><i data-lucide="brain" class="w-3 h-3"></i> Genera nuove domande</button>
-            </div>
           </div>
 
         </div>
@@ -311,11 +308,11 @@
     
     // QUIZ DATA
     let QUIZ_QUESTIONS = [
-        { q: "Qual è la capitale dell'Australia?", options: ["Sydney", "Melbourne", "Canberra", "Perth"], ans: 2 },
-        { q: "Dove si trova Machu Picchu?", options: ["Perù", "Bolivia", "Messico"], ans: 0 },
-        { q: "Quale città è famosa per i suoi canali?", options: ["Londra", "Venezia", "Berlino", "Parigi"], ans: 1 },
-        { q: "In che stato USA si trova il Grand Canyon?", options: ["Nevada", "Arizona", "Utah", "Colorado"], ans: 1 },
-        { q: "Quale piatto è tipico di Valencia?", options: ["Pizza", "Sushi", "Paella", "Kebab"], ans: 2 }
+        { q: "Quale isola è famosa per le sue tartarughe giganti?", options: ["Galapagos", "Hawaii", "Capri", "Ibiza"], ans: 0 },
+        { q: "Qual è la capitale del Giappone?", options: ["Kyoto", "Osaka", "Tokyo", "Hiroshima"], ans: 2 },
+        { q: "In quale città trovi il Colosseo?", options: ["Atene", "Roma", "Parigi", "Milano"], ans: 1 },
+        { q: "Qual è il deserto più grande del mondo?", options: ["Sahara", "Gobi", "Antartide", "Kalahari"], ans: 2 },
+        { q: "Dove si trova la Grande Barriera Corallina?", options: ["Brasile", "Australia", "Messico", "Indonesia"], ans: 1 }
     ];
     let currentQuizIdx = 0, quizScore = 0;
 
@@ -518,7 +515,6 @@
         if(typeof lucide !== 'undefined') lucide.createIcons();
     }
 
-    // --- QUIZ & AI FUNCTIONS ---
     function startQuiz() { currentQuizIdx = 0; quizScore = 0; renderQuiz(); }
     
     function renderQuiz() {
@@ -551,6 +547,8 @@
             <div class="grid gap-3 mb-6">
                 ${q.options.map((o,i)=>`<button onclick="checkAns(this,${i})" class="option-btn w-full p-4 border-2 border-slate-100 rounded-xl text-left font-bold text-slate-600 hover:border-rose-200 hover:bg-rose-50 transition-all">${o}</button>`).join('')}
             </div>
+            
+            <!-- SMART AD IN QUIZ -->
             <div class="mt-6 p-4 bg-emerald-50/80 rounded-xl border border-emerald-100 flex items-center justify-between">
               <div class="flex items-center gap-3">
                 <div class="bg-white p-2 rounded-full shadow-sm text-emerald-500"><i data-lucide="plane" class="w-4 h-4"></i></div>
@@ -580,7 +578,9 @@
     async function generateAIQuiz() {
         const grid = document.getElementById('gridContainer');
         grid.innerHTML = `<div class="col-span-full text-center py-12"><div class="w-12 h-12 border-4 border-rose-200 border-t-rose-600 rounded-full animate-spin mx-auto mb-4"></div><p class="text-slate-500">Generazione nuove domande in corso...</p></div>`;
+        
         const prompt = `Genera 5 nuove domande quiz di viaggio a risposta multipla su questi temi: vacanze estive, vacanze invernali, viaggi last minute, volo+hotel. Formato JSON array ESATTO: [{"q": "Domanda", "options": ["A","B","C","D"], "ans": 0}]. Nient'altro.`;
+        
         try {
             const txt = await callGemini(prompt);
             const cleanJson = txt.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -588,11 +588,13 @@
             if(Array.isArray(newQs) && newQs.length > 0) {
                 QUIZ_QUESTIONS = newQs; 
                 startQuiz();
-            } else throw new Error("Formato non valido");
+            } else {
+                throw new Error("Formato non valido");
+            }
         } catch(e) {
             console.error(e);
-            alert("Riprova, stiamo ricaricando le domande.");
-            startQuiz(); 
+            alert("Impossibile generare nuove domande al momento. Riprova.");
+            startQuiz(); // Fallback to existing
         }
     }
 
@@ -602,6 +604,7 @@
             if(!r.ok) throw new Error();
             const d = await r.json(); return d.result;
         } catch(e) {
+            // Fallback for demo/preview env
             if(p.includes("JSON")) return `[
                 {"q": "Quale destinazione è famosa per le vacanze estive low cost?", "options": ["Maldive", "Albania", "New York", "Islanda"], "ans": 1},
                 {"q": "Dove si trovano le migliori piste da sci per l'inverno?", "options": ["Dolomiti", "Sahara", "Roma", "Sicilia"], "ans": 0},
@@ -629,30 +632,34 @@
         setTimeout(()=>document.getElementById('aiModalInner').classList.remove('scale-95','opacity-0'),10);
         document.getElementById('aiModalBody').innerHTML = `<div class="text-center"><div class="w-8 h-8 border-4 border-slate-200 border-t-purple-600 rounded-full animate-spin mx-auto"></div></div>`;
         
-        // Improved prompt for better synthesis
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = item.description || '';
-        const cleanDesc = tempDiv.textContent.trim().substring(0, 1500); 
-        const prompt = `Fai una sintesi accattivante in italiano di questo articolo di viaggio basandoti sul titolo: "${item.title}" e sul seguente contenuto: "${cleanDesc}". Usa emoji e rendilo interessante per un viaggiatore.`;
+        const cleanDesc = item.description || "";
+        const prompt = `Agisci come un travel blogger esperto. Riassumi questo articolo in italiano in modo strutturato e ispirazionale.
+TITOLO: ${item.title}
+CONTENUTO: ${cleanDesc}
+
+Usa questa struttura:
+1. 🌍 **L'Essenza:** Una frase ad effetto che cattura lo spirito della destinazione o del consiglio.
+2. 💡 **Punti Chiave:** 3 punti elenco con le informazioni più succose o i consigli pratici presenti nel testo.
+3. 🚀 **Perché andare:** Una frase conclusiva che motiva a partire.
+
+Non usare preamboli, vai dritto al sodo.`;
 
         const txt = await callGemini(prompt);
         
-        // Add the button
-        const affiliateLink = generateAffiliateLink(item.link); 
-        
-        const htmlContent = `
-            <div class="prose prose-sm max-w-none text-slate-600">
-                ${marked.parse(txt)}
-            </div>
-            <div class="mt-6 text-center">
-                <a href="${affiliateLink}" target="_blank" 
-                   class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg hover:scale-105 transition-transform">
-                   📖 Leggi l'articolo completo
-                </a>
-            </div>
-        `;
-        
-        document.getElementById('aiModalBody').innerHTML = htmlContent;
+        document.getElementById('aiModalBody').innerHTML = `
+        <div class="prose prose-sm max-w-none text-slate-700">
+            ${marked.parse(txt)}
+        </div>
+        <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+            <p class="text-xs text-slate-400 mb-3 uppercase tracking-wide font-semibold">Vuoi saperne di più?</p>
+            <a href="${generateAffiliateLink(item.link || LOGITRAVEL_BASE)}" target="_blank"
+                class="inline-flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/30 hover:scale-105 transition-transform group">
+                <i data-lucide="book-open" class="w-5 h-5"></i>
+                Leggi l'articolo completo e scopri tutti i consigli
+                <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+            </a>
+        </div>`;
+        if(typeof lucide !== 'undefined') lucide.createIcons();
     }
     function closeAiModal() {
         document.getElementById('aiModalInner').classList.add('scale-95','opacity-0');
